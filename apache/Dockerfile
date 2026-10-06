@@ -9,8 +9,13 @@ RUN apt-get update && \
 # requests to another service (Flask).
 # The command is a2enmod, and the two modules are: proxy and proxy_http
 # Syntax: RUN a2enmod <module1> <module2>
+# "headers" is also enabled so Apache can send security headers.
 
-RUN a2enmod proxy proxy_http
+RUN a2enmod proxy proxy_http headers
+
+# Hide the Apache version and OS from response headers and error pages
+# (fixes OWASP ZAP findings 10036 and 10009).
+RUN sed -i 's/^ServerTokens .*/ServerTokens Prod/; s/^ServerSignature .*/ServerSignature Off/' /etc/apache2/conf-available/security.conf
 
 # Copy our virtual host config into Apache's sites-available directory,
 # then enable it and disable the default placeholder site.
